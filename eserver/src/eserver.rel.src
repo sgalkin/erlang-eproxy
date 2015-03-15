@@ -1,0 +1,13 @@
+{release,
+ {"eserver_rel", "A"},
+ {erts, "6.3"},
+ [{kernel, "3.1"},
+  {stdlib, "2.3"},
+  {sasl, "2.4.1"},
+  {ssl, "5.3.8"},
+  {inets, "5.10.4"},
+  {crypto, "3.4.2"},
+  {public_key, "0.22.1"},
+  {asn1, "3.0.3"},
+  {eserver, "1.0.0.0"}]
+}.

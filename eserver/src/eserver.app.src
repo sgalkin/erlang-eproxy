@@ -1,0 +1,11 @@
+{application, eserver,
+ [{description, "e-server"},
+  {vsn, "1.0.0.0"},
+  {modules, [eserver_app, eserver_sup]},
+  {registered, []},
+  {applications, [kernel, stdlib]}, %, sasl, inets, ssl, crypto, public_key]},
+  {mod, {eserver_app,[]}},
+  {env, [{config, "priv/eserver.conf"}]}
+ ]}.
+
+% , eserver_sup, eserver_worker

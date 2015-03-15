@@ -1,0 +1,6 @@
+*/ebin/*
+*.beam
+*.dump
+*.boot
+*.script
+
