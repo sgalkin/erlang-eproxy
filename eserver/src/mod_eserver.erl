@@ -19,7 +19,6 @@ do(Request) ->
 
     case Req of
         { ok, Record } ->
-            io:format("~p~n", [Record]),
             case client_sup:request(
                    Record#request.host, 
                    Record#request.method, 
@@ -36,7 +35,7 @@ do(Request) ->
                     B = binary_to_list(Body),
                     { proceed, [{response,{response, H, [B]}}] };
                 X ->
-                    io:format("~p~n", [X])
+                    { break, [{response, {500, io_lib:format("~p",[X])}}] }
             end;
         { error, _ } ->
             { break, [{response,{400, []}}] }
@@ -63,7 +62,12 @@ get_host(_Request, Record) ->
 
 get_headers(Request, Record) -> 
     Host = [{"host", Record#request.host}],
-    Headers = proplists:delete("host", Request#mod.parsed_header) ++ Host,
+    Connection = [{"connection", "keep-alive"}],
+    Extra = Host ++ Connection,
+    Headers = lists:foldl(
+                fun ({K,_},Acc) -> proplists:delete(K, Acc) end, 
+                Request#mod.parsed_header,
+                Extra) ++ Extra,
     {ok, Record#request{headers=Headers}}.
 
 get_body(Request, Record) -> 

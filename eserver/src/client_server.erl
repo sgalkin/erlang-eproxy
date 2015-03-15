@@ -6,10 +6,7 @@
 -export([init/1, terminate/2, code_change/3]).
 -export([handle_call/3, handle_cast/2, handle_info/2]).
 
--record(state, {id, name, pending=maps:new()}).
-
-%-export([sketch/0]).
--export([foo/0, bar/1]).
+-record(state, {id, name, pending=dict:new()}).
 
 request(Id, Method, Uri, Headers, Body) ->
     gen_server:call(process_name(Id), {request, Method, Uri, Headers, Body}).
@@ -22,11 +19,11 @@ start_link(Id) ->
     gen_server:start_link({local, process_name(Id)}, ?MODULE, [Id], [{debug, [log]}]).
 
 init([Id]) ->
-%    io:format("~p starting ~p(~p)~n", [self(), ?MODULE, Id]),
+    io:format("~p starting ~p(~p)~n", [self(), ?MODULE, Id]),
     %process_flag(trap_exit, true), % we want a cleanup callback TODO find the reason
-    State = #state{id=Id, name=process_name(Id)},
+
+    State = #state{id = Id, name = process_name(Id)},
     ok = create_httpc(State#state.name),
-    io:format("~p initiated ~p~n", [self(), State]),
     { ok, State }.
 
 terminate(shutdown, State) ->
@@ -58,25 +55,25 @@ handle_call({request, Method, Uri, Headers, Body}, From, State) ->
     case Result of
         {ok, RequestId} ->
             Pending = State#state.pending,
-            { noreply, State#state{pending = maps:put(RequestId, From, Pending)}};
+            { noreply, State#state{pending = dict:store(RequestId, From, Pending)}};
         {error, Reason} ->
             { reply, {error, Reason}, State }
     end.
 
 handle_cast({response, {RequestId, Result}}, State) ->
-    io:format("handle case response(~p, <result>) ~p~n", [RequestId, State]),
+    io:format("handle cast response(~p, <result>) ~p~n", [RequestId, State]),
     
     Pending = State#state.pending,
-    Client = maps:get(RequestId, Pending, undefined),
-    NewState = State#state{pending = maps:remove(RequestId, Pending)},
+    Client = dict:find(RequestId, Pending),
+    NewState = State#state{pending = dict:erase(RequestId, Pending)},
 
     case {Client, Result} of
-        {undefined, _} ->
+        {error, _} ->
             { stop, unexpected_response };
-        {C, { error, Reason } } ->
+        {{ok, C}, { error, Reason } } ->
             gen_server:reply(C, {error, Reason}),
             { noreply, NewState };
-        {C, Reply} ->
+        {{ok, C}, Reply} ->
             gen_server:reply(C, {ok, prepare_reply(Reply)}),
             { noreply, NewState }
     end.
@@ -90,7 +87,9 @@ code_change(_, State, _) ->
 
 process_name(Id) ->
     % TODO fix 255 limitation
-    erlang:list_to_atom(erlang:atom_to_list(?MODULE) ++ "_" ++ [Id]).
+    Module = erlang:atom_to_list(?MODULE),
+    Instance = Module ++ "_" ++ [Id],
+    erlang:list_to_atom(Instance).
 
 create_httpc(Profile) ->
     {ok, _} = inets:start(httpc, [{profile, Profile}]),
@@ -109,7 +108,7 @@ prepare_reply(Response) ->
     Headers = lists:foldl(
             fun (H, Acc) -> proplists:delete(H, Acc) end, 
             element(2, Response), 
-            ["connection", "alternate-protocol"]),
+            ["connection", "alternate-protocol"]) ++ [{"connection", "keep-alive"}],
     Body = element(3, Response),
 %    io:format("~p~n", [{ Status, Headers, Body }]),
     { Status, Headers, Body }.

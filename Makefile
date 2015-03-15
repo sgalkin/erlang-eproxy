@@ -1,16 +1,17 @@
 APPLICATIONS = \
 	eserver \
-	eclient \
-	einterceptor \
+
+#	eclient \
+#	einterceptor \
 
 all: applications
 applications: $(APPLICATIONS)
 
 define Application
 $(1): $(1)/Emakefile
-	@pushd $(1) > /dev/null && \
+	cd $(1) && \
 	erl -make && \
-	popd > /dev/null;
+	cd ..;
 
 $(1)/Emakefile: Emakefile
 	cp $$^ $$@

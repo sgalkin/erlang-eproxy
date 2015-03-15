@@ -6,7 +6,7 @@
 -export([request/5]).
 
 -define(CLIENT_KILL_TIMEOUT, 5000).
--define(WORKER_EXPONENT, 0).
+-define(WORKER_EXPONENT, 5).
 -define(WORKERS_MASK, bnot (-1 bsl ?WORKER_EXPONENT)).
 
 start_link() ->
