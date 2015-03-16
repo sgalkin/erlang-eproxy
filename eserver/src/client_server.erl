@@ -50,7 +50,7 @@ handle_call({request, Method, Uri, Headers, Body}, From, State) ->
     Request = fun (Req) -> httpc:request(Method, Req, [], RequestOptions, Profile) end,
     Result = case Body of
                  { undefined, _ } -> Request({Uri, Headers});
-                 { ContentType, Body } -> Request({Uri, Headers, ContentType, Body})
+                 { Type, Content } -> Request({Uri, Headers, Type, Content})
              end,
     case Result of
         {ok, RequestId} ->
