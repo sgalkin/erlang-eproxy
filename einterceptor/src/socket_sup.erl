@@ -14,7 +14,7 @@ start_link(Port) ->
 init([Port]) ->
     {ok, ListenSocket} = 
         gen_tcp:listen(Port, 
-                       [{active, once}, 
+                       [{active, false},
                         {packet, 0},
                         {backlog, 1024},
                         {keepalive, true},
@@ -26,7 +26,7 @@ init([Port]) ->
     Childs = [{fun worker/1, 
                {socket_worker, 
                 start_link, 
-                [ListenSocket, ?MODULE, socket_httpsforge_handler]}}],
+                [ListenSocket, ?MODULE, socket_sslforge_handler]}}],
     spawn(fun init_workers/0),
 
     {ok, {Restart, [F(X) || {F, X} <- Childs]}}.
