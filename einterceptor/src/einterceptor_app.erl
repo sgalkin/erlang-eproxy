@@ -9,12 +9,13 @@ start(_Type, _Args) -> % can return State
     %dbg:tpl(einterceptor_app, x),
     %dbg:tpl(einterceptor_sup, x),
     %dbg:tpl(socket_sup, x),
-    dbg:tpl(socket_worker, x),
-    dbg:tpl(socket_forward_handler,x),
+    %dbg:tpl(socket_worker, x),
+    %dbg:tpl(socket_sslforge_handler, x),
+    %dbg:tpl(certificate, x),
+    %dbg:tpl(sign_sup, x),
+    %dbg:tpl(sign_server, x),
 
-    {ok, Port} = application:get_env(port),
-    {IPort, []} = string:to_integer(Port),
-    einterceptor_sup:start_link(IPort).
+    einterceptor_sup:start_link().
 
 stop(_State) ->
     ok.

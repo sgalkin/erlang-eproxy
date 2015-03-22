@@ -37,6 +37,7 @@ connect({Address, Port}, State) ->
             {error, Reason}
     end.
 
+% TODO: use channel supervisor and passive sockets
 send(Socket, Data, #state{socket_a=A, socket_b=B} = State) ->
     ok = gen_tcp:send(Socket, Data),
     ok = inet:setopts(A, [{active, once}]),

@@ -11,7 +11,7 @@
 start_link(Port) ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, [Port]).
 
-init([Port | _]) ->
+init([Port]) ->
     {ok, ListenSocket} = 
         gen_tcp:listen(Port, 
                        [{active, once}, 
@@ -26,7 +26,7 @@ init([Port | _]) ->
     Childs = [{fun worker/1, 
                {socket_worker, 
                 start_link, 
-                [ListenSocket, ?MODULE, socket_forward_handler]}}],
+                [ListenSocket, ?MODULE, socket_httpsforge_handler]}}],
     spawn(fun init_workers/0),
 
     {ok, {Restart, [F(X) || {F, X} <- Childs]}}.
@@ -36,7 +36,7 @@ worker({M, _, _} = MFA) ->
 
 start_worker() ->
     supervisor:start_child(?MODULE, []),
-    io:format("~p~n", [supervisor:count_children(?MODULE)]).
+    io:format("~p: ~p~n", [?MODULE, supervisor:count_children(?MODULE)]).
 
 init_workers() ->
     [ start_worker() || _ <- lists:seq(1, ?WORKERS) ],

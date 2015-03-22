@@ -41,11 +41,14 @@ handle_cast({accept, ListenSocket},
 %              {tcp_closed, Socket}
 % If an error occurs on the socket, the following message is delivered:
 %              {tcp_error, Socket, Reason}
-handle_info({tcp, Socket, Data}, #state{handler=Handler, state=HState} = State) ->
+handle_info({T, Socket, Data}, #state{handler=Handler, state=HState} = State) 
+  when T == tcp; T == ssl ->
     {noreply, State#state{state=Handler:data(Socket, Data, HState)}};
 
-handle_info({tcp_closed, _S}, State) ->
+handle_info({T, _S}, State) 
+  when T == tcp_closed; T == ssl_closed ->
     {stop, normal, State};
 
-handle_info({tcp_error, _S, _}, State) ->
+handle_info({T, _S, _}, State)
+  when T == tcp_error; T == ssl_error ->
     {stop, normal, State}.

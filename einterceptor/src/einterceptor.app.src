@@ -4,8 +4,9 @@
   {modules, [einterceptor_app, einterceptor_sup]},
   {registered, []},
   {applications, [kernel, stdlib]}, %, sasl, inets, ssl, crypto, public_key]},
-  {mod, {einterceptor_app,[]}},
-  {env, [{port, "8888"}]}
+  {mod, {einterceptor_app,[]}}
+%,
+%  {env, [{port, 8888}]}
  ]}.
 
 % , eserver_sup, eserver_worker
