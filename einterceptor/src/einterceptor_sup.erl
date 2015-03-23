@@ -32,12 +32,6 @@ init([]) ->
 % Type :: worker(),
 % Modules :: modules()}
 
-    Childs = lists:append([worker(X) || X <- Workers],
-                          [supervisor(X) || X <- Supervisors]),
+    Childs = lists:append([supervisor_utils:worker(X, permanent, brutal_kill) || X <- Workers],
+                          [supervisor_utils:supervisor(X, permanent) || X <- Supervisors]),
     {ok, {Restart, Childs}}.
-
-supervisor({M, _, _} = MFA) ->
-    {M, MFA, permanent, infinity, supervisor, [M]}.
-
-worker({M, _, _} = MFA) ->
-    {M, MFA, permanent, brutal_kill, worker, [M]}.
