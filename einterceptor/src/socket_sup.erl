@@ -23,13 +23,12 @@ init([Port]) ->
                         {reuseaddr, true}]),
 
     Restart = {simple_one_for_one, 60, 3600},
-    Childs = [{fun worker/1, 
-               {socket_worker, 
-                start_link, 
-                [ListenSocket, ?MODULE, socket_sslforge_handler]}}],
+    Childs = [{socket_worker, 
+               start_link, 
+               [ListenSocket, ?MODULE, socket_sslforge_handler]}],
     spawn(fun init_workers/0),
 
-    {ok, {Restart, [F(X) || {F, X} <- Childs]}}.
+    {ok, {Restart, [worker(X) || X <- Childs]}}.
 
 worker({M, _, _} = MFA) ->
     {M, MFA, temporary, ?TERMINATE_TIMEOUT, worker, [M]}.
