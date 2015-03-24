@@ -24,6 +24,7 @@ forge_certificate(Address, Port) ->
             [] -> forge_certificate(OriginalCertificate);
             CI -> CI
         end,
+
     certificate_storage:save(OriginalFingerprint, {Address, Port}, CertificatInfo),
     {ForgedCertificate, _, ForgedPrivateKeyDer} = CertificatInfo,
     {ForgedPrivateKeyDer, ForgedCertificate}.

@@ -3,7 +3,6 @@
 
 -export([start_link/1]).
 -export([init/1]).
--export([start_worker/0]).
 
 -define(WORKERS, 16).
 -define(TCP_OPTIONS,
@@ -23,17 +22,11 @@ init([Port]) ->
 
     Restart = {simple_one_for_one, 60, 3600},
     Childs = [{socket_worker, 
-               start_link, 
-               [ListenSocket, ?MODULE, socket_sslforge_handler]}],
-    spawn(fun init_workers/0),
+               start, 
+               [ListenSocket, socket_forward_handler]}],
+    
+    supervisor_utils:init_workers(?WORKERS),
 
     {ok, {Restart, 
           [supervisor_utils:worker(X, permanent, brutal_kill) || X <- Childs]}}.
 
-start_worker() ->
-    supervisor:start_child(?MODULE, []),
-    io:format("~p: ~p~n", [?MODULE, supervisor:count_children(?MODULE)]).
-
-init_workers() ->
-    [ start_worker() || _ <- lists:seq(1, ?WORKERS) ],
-    ok.
